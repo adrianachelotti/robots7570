@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/Java"/>
+	<classpathentry kind="lib" path="C:/joone/lib/bsh.jar"/>
+	<classpathentry kind="lib" path="C:/joone/lib/jakarta-poi.jar"/>
+	<classpathentry kind="lib" path="C:/joone/lib/jh.jar"/>
+	<classpathentry kind="lib" path="C:/joone/lib/jhotdraw.jar"/>
+	<classpathentry kind="lib" path="C:/joone/lib/joone-editor.jar"/>
+	<classpathentry kind="lib" path="C:/joone/lib/joone-engine.jar"/>
+	<classpathentry kind="lib" path="C:/joone/lib/log4j.jar"/>
+	<classpathentry kind="lib" path="C:/joone/lib/SOMImageTester.jar"/>
+	<classpathentry kind="lib" path="C:/joone/lib/visad.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
