@@ -4,26 +4,26 @@ import org.joone.io.*;
 import org.joone.net.NeuralNet;
 
 /**
- * Programa de demostraci—n basado en XORMemory.java e
- * ImmediateEmbeddedXOR.java
+ * Reconocimiento de triangulos, cuadrados y circulos regulares
+ * basado en ejemplo XORMemory.java e ImmediateEmbeddedXOR.java
  * ambos programas se pueden encontrar en el joone-engine
  * en el directorio samples/engine/xor
- * 
  */
-public class XOR_training_test implements NeuralNetListener {
+public class GeometricFigureRecognizer implements NeuralNetListener {
 	
-	// XOR input
+	// Input para entrenamiento
 	private double[][]  vectorEntrada = new double[][] {
-			{0.0, 0.0, 0.0},
-			{0.0, 1.0, 1.0},
-			{1.0, 0.0, 1.0},
-			{1.0, 1.0, 0.0}
+//prop. franja 1,   2,   3,  Tri  Cir  Cua  	
+			{0.17, 0.5, 0.67, 1.0, 0.0, 0.0},
+			{0.7, 0.98, 0.7, 0.0, 1.0, 0.0},
+			{1.0, 1.0, 1.0, 0.0, 0.0, 1.0}
 	};
+	
+	//Vector de prueba (luego va a llegar esta entrada
 	private double[][]  vectorPrueba = new double[][] {
-			{0.0, 0.0},
-			{0.0, 1.0},
-			{1.0, 0.0},
-			{1.0, 1.0}
+			{0.17, 0.5, 0.67},
+			{0.7, 0.98, 0.7},
+			{1.0, 1.0, 1.0}
 	};
 	
 	private long mills;
@@ -32,13 +32,14 @@ public class XOR_training_test implements NeuralNetListener {
 	private SigmoidLayer	oculta;
 	private SigmoidLayer	salida;
 	private Monitor monitor = new Monitor();
+	private int cant_de_img=3;
 	
 	
 	/**
 	 * @param args the command line arguments
 	 */
 	public static void main(String args[]) {
-		XOR_training_test   xor = new XOR_training_test();
+		GeometricFigureRecognizer   xor = new GeometricFigureRecognizer();
 		
 		xor.iniciar();
 		xor.entrenar();
@@ -63,9 +64,9 @@ public class XOR_training_test implements NeuralNetListener {
 		salida.setLayerName("Salida");
 		
 		// Asignamos las cantidad de neuronas en cada capa
-		entrada.setRows(2);
+		entrada.setRows(3);
 		oculta.setRows(3);
-		salida.setRows(1);
+		salida.setRows(3);
 		
 		//adiciona las capas a la red
 		red.addLayer(entrada);
@@ -105,7 +106,7 @@ public class XOR_training_test implements NeuralNetListener {
 		
 		//Indicamos que columnas son las entradas
 		inputStream.setInputArray(vectorEntrada);
-		inputStream.setAdvancedColumnSelector("1,2");
+		inputStream.setAdvancedColumnSelector("1,2,3");
 		
 		// set the input data
 //		input.addInputSynapse(inputStream);
@@ -120,7 +121,7 @@ public class XOR_training_test implements NeuralNetListener {
 		
 		//Indicamos cual de las columnas es la salida
 		samples.setInputArray(vectorEntrada);
-		samples.setAdvancedColumnSelector("3");
+		samples.setAdvancedColumnSelector("4,5,6");
 		supervisor.setDesired(samples);
 		
 		// Connects the Teacher to the last layer of the net
@@ -131,7 +132,7 @@ public class XOR_training_test implements NeuralNetListener {
 		 * instanziated on separated threads.
 		 */
 		red.start();
-		monitor.setTrainingPatterns(4);	// # of rows (patterns) contained in the input file
+		monitor.setTrainingPatterns(3);	// # of rows (patterns) contained in the input file
 		monitor.setTotCicles(10000);		// How many times the net must be trained on the input patterns
 		monitor.setLearning(true);		// The net must be trained
 		mills = System.currentTimeMillis();
@@ -161,9 +162,9 @@ public class XOR_training_test implements NeuralNetListener {
 		// Now we interrogate the net
 		monitor.setLearning(false);
 		red.start();
-		for (int i=0; i < 4; ++i) {
+		for (int i=0; i < cant_de_img; ++i) {
 			// Prepare the next input pattern
-			System.out.println("Input: "+vectorPrueba[i][0]+"  "+vectorPrueba[i][1]);
+			System.out.println("Input: "+vectorPrueba[i][0]+"  "+vectorPrueba[i][1]+"  "+vectorPrueba[i][2]);
 			Pattern iPattern = new Pattern(vectorPrueba[i]);
 			iPattern.setCount(i+1);
 			// Interrogate the net
@@ -171,10 +172,20 @@ public class XOR_training_test implements NeuralNetListener {
 			// Read the output pattern and print out it
 			// double[] pattern = memOut.getNextPattern();
 			Pattern pattern = memOut.fwdGet();
-			System.out.println("Output: "+pattern.getArray()[0]);
+			String salida;
+			if((pattern.getArray()[0]>0.8)&&(pattern.getArray()[1]<0.1)&&(pattern.getArray()[2]<0.1))
+				salida="Es un TRIANGULO";
+			else if((pattern.getArray()[0]<0.1)&&(pattern.getArray()[1]>0.8)&&(pattern.getArray()[2]<0.1))
+				salida="Es un CIRCULO";
+			else if((pattern.getArray()[0]<0.1)&&(pattern.getArray()[1]<0.1)&&(pattern.getArray()[2]>0.8))
+				salida="Es un CUADRADO";
+			else
+				salida="La figura no fue reconocida";
+			
+			System.out.println("Output: "+salida);
 		}
 		//Tell the network to stop
-		Pattern stop = new Pattern(new double[2]);
+		Pattern stop = new Pattern(new double[3]);
 		stop.setCount(-1);
 		memInp.fwdPut(stop);
 		memOut.fwdGet();
