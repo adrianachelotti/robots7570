@@ -54,6 +54,7 @@ public class ProcesadorDeImagenes {
 		
 
 	}
+	  
 	public void recortarImagen(String name)
 	{
 		int imagenWidth = this.imageO.getWidth();
@@ -154,6 +155,7 @@ public class ProcesadorDeImagenes {
 		
 	}
 	
+	
 
 
 	private double[] getPorcentajes() 
@@ -198,6 +200,7 @@ public class ProcesadorDeImagenes {
 		return porcentajes;
 		
 	}
+	
 	public static void main (String args[]) 
 	{
 		
@@ -214,11 +217,13 @@ public class ProcesadorDeImagenes {
 				converso.procesarImagen();
 				converso.recortarImagen(ficheros[s]);
 				double porcentajes[]= converso.getPorcentajes();
-				for (int i = 0; i < porcentajes.length; i++) {
+				for (int i = 0; i < porcentajes.length; i++) 
+				{
 					System.out.println(porcentajes[i]);	
-				}
-					
-				
+				}				
+				// si el archivo  ya se proceso muevo el archivo
+				File archivo = new File("Figuras/"+ficheros[s]);
+				archivo.renameTo(new File("Figuras/Procesadas/"+ficheros[s]));
 				
 			}
 		}
