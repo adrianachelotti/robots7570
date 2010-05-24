@@ -1,3 +1,5 @@
+import java.io.File;
+
 import org.joone.engine.*;
 import org.joone.engine.learning.*;
 import org.joone.io.*;
@@ -12,12 +14,12 @@ import org.joone.net.NeuralNet;
 public class GeometricFigureRecognizer implements NeuralNetListener {
 	
 	// Input para entrenamiento
-	private double[][]  vectorEntrada = new double[][] {
-//prop. franja 1,   2,   3,  Tri  Cir  Cua  	
-			{0.17, 0.5, 0.67, 1.0, 0.0, 0.0},
-			{0.7, 0.98, 0.7, 0.0, 1.0, 0.0},
-			{1.0, 1.0, 1.0, 0.0, 0.0, 1.0}
-	};
+//	private double[][]  vectorEntrada = new double[][] {
+////prop. franja 1,   2,   3,  Tri  Cir  Cua  	
+//			{0.17, 0.5, 0.67, 1.0, 0.0, 0.0},
+//			{0.7, 0.98, 0.7, 0.0, 1.0, 0.0},
+//			{1.0, 1.0, 1.0, 0.0, 0.0, 1.0}
+//	};
 	
 	//Vector de prueba (luego va a llegar esta entrada
 	private double[][]  vectorPrueba = new double[][] {
@@ -40,9 +42,47 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 	 */
 	public static void main(String args[]) {
 		GeometricFigureRecognizer   xor = new GeometricFigureRecognizer();
+		double vectorEntrada[][]={{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0}};
+		ProcesadorDeImagenes converso = new ProcesadorDeImagenes();
+		String path = "Figuras/";
+		File directorio = new File(path);
+		String [] ficheros = directorio.list();
+		int index=0;
 		
+		//Inicializo la red
 		xor.iniciar();
-		xor.entrenar();
+		
+		//la entreno
+		for (int s = 0; s < ficheros.length; s++) 
+		{
+			if (ficheros[s].contains(".jpg"))
+			{
+				System.out.println(ficheros[s]);
+				converso.cargarImagen("Figuras/"+ficheros[s]);
+				converso.procesarImagen();
+				converso.recortarImagen(ficheros[s]);
+				double porcentajes[]= converso.getPorcentajes();
+				for (int i = 0; i < porcentajes.length; i++) 
+				{
+					vectorEntrada[index][i]=porcentajes[i];					
+					System.out.println(porcentajes[i]);
+					
+				}	
+				vectorEntrada[index][3]=ficheros[s].toLowerCase().contains("triangulo")?1.0:0.0;
+				vectorEntrada[index][4]=ficheros[s].toLowerCase().contains("circulo")?1.0:0.0;
+				vectorEntrada[index][5]=ficheros[s].toLowerCase().contains("cuadrado")?1.0:0.0;
+				index++;
+				// si el archivo  ya se proceso muevo el archivo
+				File archivo = new File("Figuras/"+ficheros[s]);
+				archivo.renameTo(new File("Figuras/Procesadas/"+ficheros[s]));
+				
+			}
+		}
+
+		xor.entrenar(vectorEntrada);
+	
+		
+		
 		xor.testear();
 	}
 	
@@ -89,7 +129,7 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 		salida.addInputSynapse(conexionOcultaSalida);
 	}
 	
-	public void entrenar(){
+	public void entrenar(double[][] vectorEntrada){
 		// Create the Monitor object and set the learning parameters
 		monitor = new Monitor();
 		
