@@ -7,6 +7,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import org.apache.log4j.spi.ThrowableInformation;
+
 
 
 
@@ -145,6 +147,8 @@ public class ProcesadorDeImagenes {
 			j--;
 		}
 		System.out.println(xBegin+"  "+xEnd+"  "+yBegin+"  "+yEnd);
+		//TODO ver que pasa si los limites se cruzan
+//		if ((xEnd<xBegin)||(yBegin<yEnd))
 		this.imagenR= this.imageO.getSubimage(xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
 		try {
 			ImageIO.write(this.imagenR, "jpg", new File("Figuras/Recortes/"+name.replace(".jpg", "_recotada")+".jpg"));
@@ -158,12 +162,12 @@ public class ProcesadorDeImagenes {
 	
 
 
-	private double[] getPorcentajes() 
+	public double[] getPorcentajes() 
 	{
 		int ancho = this.imagenR.getWidth();
 		int alto = this.imagenR.getHeight();
 		double[] porcentajes = {0,0,0};
-		double unTercioDelArea=(double)(ancho*alto);
+		double unTercioDelArea=(double)(ancho*alto/3);
 		for (int i = 0; i < alto; i++) 
 		{
 			for (int j = 0; j < ancho; j++) 
@@ -194,9 +198,9 @@ public class ProcesadorDeImagenes {
 			}
 			
 		}
-		porcentajes[0]=(double)100* porcentajes[0]/unTercioDelArea;
-		porcentajes[1]=(double)100* porcentajes[1]/unTercioDelArea;
-		porcentajes[2]=(double)100* porcentajes[2]/unTercioDelArea;
+		porcentajes[0]=(double) porcentajes[0]/unTercioDelArea;
+		porcentajes[1]=(double) porcentajes[1]/unTercioDelArea;
+		porcentajes[2]=(double) porcentajes[2]/unTercioDelArea;
 		return porcentajes;
 		
 	}
