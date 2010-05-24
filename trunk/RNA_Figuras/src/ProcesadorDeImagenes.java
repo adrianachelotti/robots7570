@@ -22,7 +22,10 @@ public class ProcesadorDeImagenes {
 		// TODO Auto-generated constructor stub
 		this.imageO= new BufferedImage(IMAGEN_WIDTH,IMAGEN_HEIGHT,BufferedImage.TYPE_INT_RGB);
 	}
-	
+	/**
+	 * Carga en BufferedImage la imagen de un archivo
+	 * @param nameFile
+	 */
 	public void cargarImagen(String nameFile)
 	{
 		File archivoImagenAProcesar = new File(nameFile);
@@ -35,6 +38,10 @@ public class ProcesadorDeImagenes {
 		
 		
 	}
+	/**
+	 * Toma la imagenO y cambia todo pixel distinto de blanco (rfg = -1 ??)
+	 * y los setea a negro
+	 */
 	public void procesarImagen()
 	{
 		int screenWidth = this.imageO.getWidth();
@@ -56,7 +63,11 @@ public class ProcesadorDeImagenes {
 		
 
 	}
-	  
+	 /**
+	  * Busco los delimitadores de la figura dentro de la imagen
+	  * Graba esta imagen transformada en la carpeta de Recortes 
+	  * @param name: nombre del archivo de la imagen
+	  */
 	public void recortarImagen(String name)
 	{
 		int imagenWidth = this.imageO.getWidth();
@@ -146,7 +157,7 @@ public class ProcesadorDeImagenes {
 			}
 			j--;
 		}
-		System.out.println(xBegin+"  "+xEnd+"  "+yBegin+"  "+yEnd);
+		System.out.println("Recortando imagen: (" +xBegin+" ,"+ yBegin+")  ("+xEnd+" , "+yEnd+")");
 		//TODO ver que pasa si los limites se cruzan
 //		if ((xEnd<xBegin)||(yBegin<yEnd))
 		this.imagenR= this.imageO.getSubimage(xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
@@ -161,27 +172,35 @@ public class ProcesadorDeImagenes {
 	
 	
 
-
+	/**
+	 * Divide la imagen en tres zonas en sentido horizontal y calcula el porcentaje
+	 * de pixeles negros sobre el total de la subzona
+	 * @return double[] que contiene valores  entre 0 y 1.
+	 */
 	public double[] getPorcentajes() 
 	{
 		int ancho = this.imagenR.getWidth();
 		int alto = this.imagenR.getHeight();
 		double[] porcentajes = {0,0,0};
-		double unTercioDelArea=(double)(ancho*alto/3);
+		int total1=0;
+		int total2=0;
+		int total3=0;
 		for (int i = 0; i < alto; i++) 
 		{
 			for (int j = 0; j < ancho; j++) 
 			{
 							
-				if(i<alto/3)
+				if(i<=alto/3)
 				{
+					total1++;
 					if (this.imagenR.getRGB(j, i)!=-1)
 					{
 						porcentajes[0]++;
 					}
 				}
-				if((i>=alto/3)&&(i<=(alto*2/3)))
+				if((i>alto/3)&&(i<=(alto*2/3)))
 				{
+					total2++;
 					if (this.imagenR.getRGB(j,i)!=-1)
 					{
 						porcentajes[1]++;
@@ -189,6 +208,7 @@ public class ProcesadorDeImagenes {
 				}
 				if((i<=alto)&&(i>=(alto*2/3)))
 				{
+					total3++;
 					if (this.imagenR.getRGB(j, i)!=-1)
 					{
 						porcentajes[2]++;
@@ -198,12 +218,14 @@ public class ProcesadorDeImagenes {
 			}
 			
 		}
-		porcentajes[0]=(double) porcentajes[0]/unTercioDelArea;
-		porcentajes[1]=(double) porcentajes[1]/unTercioDelArea;
-		porcentajes[2]=(double) porcentajes[2]/unTercioDelArea;
+		porcentajes[0]=(double) porcentajes[0]/total1;
+		porcentajes[1]=(double) porcentajes[1]/total2;
+		porcentajes[2]=(double) porcentajes[2]/total3;
 		return porcentajes;
 		
 	}
+	
+	
 	
 	public static void main (String args[]) 
 	{
