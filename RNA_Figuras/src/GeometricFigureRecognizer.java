@@ -35,54 +35,66 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 	private SigmoidLayer	salida;
 	private Monitor monitor = new Monitor();
 	private int cant_de_img=3;
+	public static int cantidad_ArchivosImagenes=0;
 	
 	
-	/**
-	 * @param args the command line arguments
-	 */
 	public static void main(String args[]) {
 		GeometricFigureRecognizer   xor = new GeometricFigureRecognizer();
-		double vectorEntrada[][]={{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0}};
+		// vectorEntrada para el caso q tengo 15 archivos para entrenar
+		//TODO: ver como hacer esta variable dinamica o algo por el estilo
+		double vectorEntrada[][]={	{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},
+									{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},
+									{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},
+									{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},
+									{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0}
+								};
+		
 		ProcesadorDeImagenes converso = new ProcesadorDeImagenes();
 		String path = "Figuras/";
 		File directorio = new File(path);
 		String [] ficheros = directorio.list();
 		int index=0;
 		
-		//Inicializo la red
+		// Armo  la red
 		xor.iniciar();
 		
-		//la entreno
+		
+		// Recorro los archivos que hay en la carpeta Figuras, todos los que
+		// sean ".jpg"
 		for (int s = 0; s < ficheros.length; s++) 
 		{
 			if (ficheros[s].contains(".jpg"))
 			{
-				System.out.println(ficheros[s]);
+				cantidad_ArchivosImagenes++;
+				System.out.println("Procesando archivo: " +ficheros[s]);
+				//  cargo la imagen desde el archivo
 				converso.cargarImagen("Figuras/"+ficheros[s]);
+				// paso a blanco y negro la imagen 
 				converso.procesarImagen();
+				//delimito la imagen
 				converso.recortarImagen(ficheros[s]);
+				// obtengo los porcentajes segun en las 3 zonas en que se divide 
 				double porcentajes[]= converso.getPorcentajes();
 				for (int i = 0; i < porcentajes.length; i++) 
 				{
 					vectorEntrada[index][i]=porcentajes[i];					
-					System.out.println(porcentajes[i]);
+					System.out.println("porcentaje["+i+"]="+porcentajes[i]);
 					
 				}	
+				//Según la figura que sea, asigno 1.0. El orden es triangulo-circulo-cuadrado
 				vectorEntrada[index][3]=ficheros[s].toLowerCase().contains("triangulo")?1.0:0.0;
 				vectorEntrada[index][4]=ficheros[s].toLowerCase().contains("circulo")?1.0:0.0;
 				vectorEntrada[index][5]=ficheros[s].toLowerCase().contains("cuadrado")?1.0:0.0;
+				//indice para controlar el llenado del vector de Entrada
 				index++;
-				// si el archivo  ya se proceso muevo el archivo
+				//Si el archivo  ya se proceso muevo el archivo 
 				File archivo = new File("Figuras/"+ficheros[s]);
 				archivo.renameTo(new File("Figuras/Procesadas/"+ficheros[s]));
 				
 			}
 		}
 
-		xor.entrenar(vectorEntrada);
-	
-		
-		
+		xor.entrenar(vectorEntrada);		
 		xor.testear();
 	}
 	
@@ -172,7 +184,7 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 		 * instanziated on separated threads.
 		 */
 		red.start();
-		monitor.setTrainingPatterns(3);	// # of rows (patterns) contained in the input file
+		monitor.setTrainingPatterns(cantidad_ArchivosImagenes);	// # of rows (patterns) contained in the input file
 		monitor.setTotCicles(10000);		// How many times the net must be trained on the input patterns
 		monitor.setLearning(true);		// The net must be trained
 		mills = System.currentTimeMillis();
