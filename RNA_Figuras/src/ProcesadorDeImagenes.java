@@ -1,13 +1,9 @@
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Canvas;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 
 import javax.imageio.ImageIO;
-
-import org.apache.log4j.spi.ThrowableInformation;
 
 
 
@@ -39,7 +35,7 @@ public class ProcesadorDeImagenes {
 		
 	}
 	/**
-	 * Toma la imagenO y cambia todo pixel distinto de blanco (rfg = -1 ??)
+	 * Toma la imagenO y cambia todo pixel distinto de blanco
 	 * y los setea a negro
 	 */
 	public void procesarImagen()
@@ -157,14 +153,12 @@ public class ProcesadorDeImagenes {
 			}
 			j--;
 		}
-		System.out.println("Recortando imagen: (" +xBegin+" ,"+ yBegin+")  ("+xEnd+" , "+yEnd+")");
 		//TODO ver que pasa si los limites se cruzan
 //		if ((xEnd<xBegin)||(yBegin<yEnd))
 		this.imagenR= this.imageO.getSubimage(xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
 		try {
 			ImageIO.write(this.imagenR, "jpg", new File("Figuras/Recortes/"+name.replace(".jpg", "_recotada")+".jpg"));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
