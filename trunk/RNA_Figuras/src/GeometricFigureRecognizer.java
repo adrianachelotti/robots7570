@@ -13,20 +13,12 @@ import org.joone.net.NeuralNet;
  */
 public class GeometricFigureRecognizer implements NeuralNetListener {
 	
-	// Input para entrenamiento
-//	private double[][]  vectorEntrada = new double[][] {
-////prop. franja 1,   2,   3,  Tri  Cir  Cua  	
-//			{0.17, 0.5, 0.67, 1.0, 0.0, 0.0},
-//			{0.7, 0.98, 0.7, 0.0, 1.0, 0.0},
-//			{1.0, 1.0, 1.0, 0.0, 0.0, 1.0}
-//	};
-	
 	//Vector de prueba (luego va a llegar esta entrada
-	private double[][]  vectorPrueba = new double[][] {
-			{0.17, 0.5, 0.67},
-			{0.7, 0.98, 0.7},
-			{1.0, 1.0, 1.0}
-	};
+//	private double[][]  vectorPrueba = new double[][] {
+//			{0.17, 0.5, 0.67},
+//			{0.7, 0.98, 0.7},
+//			{1.0, 1.0, 1.0}
+//	};
 	
 	private long mills;
 	private NeuralNet red;
@@ -39,10 +31,15 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 	
 	
 	public static void main(String args[]) {
+		
+		double[][] vectorPrueba = new double[][] { {0.0, 0.0, 0.0} };
+		
 		GeometricFigureRecognizer   xor = new GeometricFigureRecognizer();
 		// vectorEntrada para el caso q tengo 15 archivos para entrenar
 		//TODO: ver como hacer esta variable dinamica o algo por el estilo
 		double vectorEntrada[][]={	{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},
+									{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},
+									{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},
 									{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},
 									{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},
 									{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},
@@ -67,6 +64,7 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 			{
 				cantidad_ArchivosImagenes++;
 				System.out.println("Procesando archivo: " +ficheros[s]);
+				//System.out.print(ficheros[s] + ";");
 				//  cargo la imagen desde el archivo
 				converso.cargarImagen("Figuras/"+ficheros[s]);
 				// paso a blanco y negro la imagen 
@@ -78,9 +76,11 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 				for (int i = 0; i < porcentajes.length; i++) 
 				{
 					vectorEntrada[index][i]=porcentajes[i];					
-					System.out.println("porcentaje["+i+"]="+porcentajes[i]);
+					System.out.println("proporcion["+i+"]="+porcentajes[i]);
+					//System.out.print(porcentajes[i]+";");
 					
 				}	
+				System.out.println();
 				//Según la figura que sea, asigno 1.0. El orden es triangulo-circulo-cuadrado
 				vectorEntrada[index][3]=ficheros[s].toLowerCase().contains("triangulo")?1.0:0.0;
 				vectorEntrada[index][4]=ficheros[s].toLowerCase().contains("circulo")?1.0:0.0;
@@ -95,7 +95,17 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 		}
 
 		xor.entrenar(vectorEntrada);		
-		xor.testear();
+		
+		converso.cargarImagen("Figuras/Testeo/testeo.jpg");
+		converso.procesarImagen();
+		converso.recortarImagen("testeo.jpg");
+		double vectorProporcion[] = converso.getPorcentajes();
+		for(int i = 0;i<vectorProporcion.length;i++)
+		{
+			vectorPrueba[0][i] = vectorProporcion[i];
+		} 
+				
+		xor.testear(vectorPrueba);
 	}
 	
 	/**
@@ -191,7 +201,7 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 		monitor.Go();					// The net starts the training job
 	}
 	
-	public  void testear(){
+	public  void testear(double vectorPrueba[][]){
 		// Joone utiliza hilos para ejecutar el entrenamiento,
 		// por lo tanto debemos esperar a que el entrenamiento termine
 		// antes de probar la red. El metodo join() espera a que los hilos de la 
@@ -214,7 +224,9 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 		// Now we interrogate the net
 		monitor.setLearning(false);
 		red.start();
-		for (int i=0; i < cant_de_img; ++i) {
+		//for (int i=0; i < cant_de_img; ++i)
+		for (int i=0; i < 1; ++i)
+		{
 			// Prepare the next input pattern
 			System.out.println("Input: "+vectorPrueba[i][0]+"  "+vectorPrueba[i][1]+"  "+vectorPrueba[i][2]);
 			Pattern iPattern = new Pattern(vectorPrueba[i]);
@@ -225,12 +237,18 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 			// double[] pattern = memOut.getNextPattern();
 			Pattern pattern = memOut.fwdGet();
 			String salida;
-			if((pattern.getArray()[0]>0.8)&&(pattern.getArray()[1]<0.1)&&(pattern.getArray()[2]<0.1))
+			
+			System.out.println("*********Reconocimiento*********");
+			System.out.println("Triangulo:" + pattern.getArray()[0]);
+			System.out.println("Circulo:" + pattern.getArray()[1]);
+			System.out.println("Rectangulo:" + pattern.getArray()[2]);
+			
+			                   if((pattern.getArray()[0]>0.8)&&(pattern.getArray()[1]<0.1)&&(pattern.getArray()[2]<0.1))
 				salida="Es un TRIANGULO";
 			else if((pattern.getArray()[0]<0.1)&&(pattern.getArray()[1]>0.8)&&(pattern.getArray()[2]<0.1))
 				salida="Es un CIRCULO";
 			else if((pattern.getArray()[0]<0.1)&&(pattern.getArray()[1]<0.1)&&(pattern.getArray()[2]>0.8))
-				salida="Es un CUADRADO";
+				salida="Es un RECTANGULO";
 			else
 				salida="La figura no fue reconocida";
 			
