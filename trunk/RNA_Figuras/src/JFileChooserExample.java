@@ -7,7 +7,7 @@ import javax.swing.*;
 @SuppressWarnings("serial")
 class JFileChooserExample extends JFrame implements ActionListener {
    
-	private JEditorPane jep = new JEditorPane();
+	private JTextArea jep = new JTextArea();
 	private boolean redEntrenada=false;
 	private GeometricFigureRecognizer reconocedor = new GeometricFigureRecognizer();
 	private boolean LOGGER = false;
@@ -25,7 +25,7 @@ class JFileChooserExample extends JFrame implements ActionListener {
       menuBar.add(menu); 
       setJMenuBar(menuBar);
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      setSize(200,300);
+      setSize(500,400);
    }
 
    public void actionPerformed(ActionEvent e) {
@@ -34,20 +34,18 @@ class JFileChooserExample extends JFrame implements ActionListener {
       {
     	  if (!redEntrenada)
     	  {
-    	  	  this.reconocedor.inicializarReconocimiento();
+    	  	  this.reconocedor.inicializarReconocimiento(jep);
     	  	  redEntrenada=true;
     	  }
     	  else
     		  mensajeRedEntrenada();
-    	  
       }
       else if(ac.equals("Reconocer")) 
       {
     	  String pathFigura = obtenerFigura();
     	  if (pathFigura != null)
     	  {
-    		  System.out.println("IMAGEN: " + pathFigura);
-    		  reconocedor.reconocer(pathFigura);
+    		  reconocedor.reconocer(pathFigura,jep);
     	  }
       }
       else if(ac.equals("Salir")) System.exit(0);
@@ -55,26 +53,14 @@ class JFileChooserExample extends JFrame implements ActionListener {
 
    public void mensajeRedEntrenada()
    {
-	   System.out.println("RED YA ENTRENADA");
+	   String mensaje = "La red ya se encuentra entrenada.";
+	   if(LOGGER)System.out.println(mensaje);
+	  	   
+	   JOptionPane.showMessageDialog(this,mensaje,"Información",
+				JOptionPane.INFORMATION_MESSAGE);
    }
    
-   
-   /*
-    private void openFile() {
-      JFileChooser jfc = new JFileChooser();
-      int result = jfc.showOpenDialog(this);
-      if(result == JFileChooser.CANCEL_OPTION) return;
-      try {
-         File file = jfc.getSelectedFile();
-         BufferedReader br = new BufferedReader(new FileReader(file));
-         String s=""; int c=0;
-         while((c=br.read())!=-1) s+=(char)c;
-         br.close(); jep.setText(s);
-      } catch (Exception e) {
-         JOptionPane.showMessageDialog(this,e.getMessage(),
-         "File error",JOptionPane.ERROR_MESSAGE);}
-   }
-*/
+      
    private String obtenerFigura()
    {
       JFileChooser jfc = new JFileChooser();
@@ -83,18 +69,7 @@ class JFileChooserExample extends JFrame implements ActionListener {
       File file = jfc.getSelectedFile();
       if (LOGGER) System.out.println("Directorio:" + file.getAbsolutePath());
       return file.getAbsolutePath();
-      
-      /*try
-      {
-         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-         bw.write(jep.getText());
-         bw.close();
-      }
-      catch (Exception e) 
-      {
-         JOptionPane.showMessageDialog(this,e.getMessage(),"File Error",
-        		 					JOptionPane.ERROR_MESSAGE);
-      }*/
+            
    }
 
    private JMenuItem make(String name) {
