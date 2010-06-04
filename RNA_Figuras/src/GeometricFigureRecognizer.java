@@ -1,8 +1,17 @@
 import java.io.File;
 
-import org.joone.engine.*;
-import org.joone.engine.learning.*;
-import org.joone.io.*;
+import javax.swing.JTextArea;
+
+import org.joone.engine.DirectSynapse;
+import org.joone.engine.FullSynapse;
+import org.joone.engine.LinearLayer;
+import org.joone.engine.Monitor;
+import org.joone.engine.NeuralNetEvent;
+import org.joone.engine.NeuralNetListener;
+import org.joone.engine.Pattern;
+import org.joone.engine.SigmoidLayer;
+import org.joone.engine.learning.TeachingSynapse;
+import org.joone.io.MemoryInputSynapse;
 import org.joone.net.NeuralNet;
 
 /**
@@ -21,7 +30,7 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 	private Monitor monitor = new Monitor();
 	private int cantidad_ArchivosImagenes=0;
 	private ProcesadorDeImagenes procesadorImagenes;
-	private boolean LOGGER = true;
+	private boolean LOGGER = false;
 	
 	public GeometricFigureRecognizer()
 	{	
@@ -29,7 +38,7 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 		
 	}
 	
-	public void inicializarReconocimiento() {
+	public void inicializarReconocimiento(JTextArea jep) {
 						
 		// vectorEntrada para el caso q tengo 15 archivos para entrenar
 		double vectorEntrada[][]={	{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},{0.0 ,0.0,0.0,0.0,0.0,0.0},
@@ -49,6 +58,8 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 		// Armo  la red
 		this.iniciar();
 					
+		if(LOGGER) System.out.println("***************** Entrenamiento *****************");
+		jep.append("***************** Entrenamiento *****************\n");
 		// Recorro los archivos que hay en la carpeta Figuras, todos los que
 		// sean ".jpg"
 		for (int s = 0; s < ficheros.length; s++) 
@@ -56,7 +67,8 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 			if (ficheros[s].contains(".jpg"))
 			{
 				cantidad_ArchivosImagenes++;
-				System.out.println("Procesando archivo: " +ficheros[s]);
+				if(LOGGER) System.out.println("Procesando archivo: " +ficheros[s]);
+				jep.append("Procesando archivo: " +ficheros[s]+"\n");
 				//System.out.print(ficheros[s] + ";");
 				//  cargo la imagen desde el archivo
 				procesadorImagenes.cargarImagen(path+ficheros[s]);
@@ -69,7 +81,8 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 				for (int i = 0; i < porcentajes.length; i++) 
 				{
 					vectorEntrada[index][i]=porcentajes[i];					
-					if (this.LOGGER)System.out.println("proporcion["+i+"]="+porcentajes[i]);
+					if(LOGGER) System.out.println("proporcion["+i+"]="+porcentajes[i]);
+					jep.append("proporcion["+i+"]="+porcentajes[i]+"\n");
 				}	
 							
 				//Según la figura que sea, asigno 1.0. El orden es triangulo-circulo-cuadrado
@@ -81,8 +94,8 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 			}
 		}
 
+		jep.append("Entrenando.........\n");
 		this.entrenar(vectorEntrada);		
-		
 	}
 	
 	/**
@@ -176,7 +189,7 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 		monitor.Go();					// The net starts the training job
 	}
 	
-	public void reconocer(String pathFigura){
+	public void reconocer(String pathFigura, JTextArea jep){
 		
 		double[][] vectorPrueba = new double[][] { {0.0, 0.0, 0.0} };
 		procesadorImagenes.cargarImagen(pathFigura);
@@ -211,11 +224,13 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 		monitor.setLearning(false);
 		red.start();
 		//for (int i=0; i < cant_de_img; ++i)
-		if(this.LOGGER) System.out.println("***************** Test *****************");
+		if(LOGGER) System.out.println("***************** Reconocimiento *****************");
+		jep.setText("***************** Reconocimiento *****************\n");
 		for (int i=0; i < 1; ++i)
 		{
 			// Prepare the next input pattern
-			if (this.LOGGER) System.out.println("Input: "+vectorPrueba[i][0]+"  "+vectorPrueba[i][1]+"  "+vectorPrueba[i][2]);
+			if(LOGGER) System.out.println("Input: "+vectorPrueba[i][0]+"  "+vectorPrueba[i][1]+"  "+vectorPrueba[i][2]);
+			jep.append("Input: "+vectorPrueba[i][0]+"  "+vectorPrueba[i][1]+"  "+vectorPrueba[i][2]+"\n");
 			Pattern iPattern = new Pattern(vectorPrueba[i]);
 			iPattern.setCount(i+1);
 			// Interrogate the net
@@ -225,14 +240,19 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 			Pattern pattern = memOut.fwdGet();
 			String salida;
 			
-			if (this.LOGGER) 
+			if(LOGGER)
 			{
-				System.out.println("*********Reconocimiento*********");
+				System.out.println("********* Nivel de reconocimiento *********");
 				System.out.println("Triangulo:" + pattern.getArray()[0]);
 				System.out.println("Circulo:" + pattern.getArray()[1]);
 				System.out.println("Rectangulo:" + pattern.getArray()[2]);
 			}
+			jep.append("********* Nivel de reconocimiento *********\n");
+			jep.append("Triangulo:" + pattern.getArray()[0]+"\n");
+			jep.append("Circulo:" + pattern.getArray()[1]+"\n");
+			jep.append("Rectangulo:" + pattern.getArray()[2]+"\n");
 			
+							
 			if((pattern.getArray()[0]>0.8)&&(pattern.getArray()[1]<0.1)&&(pattern.getArray()[2]<0.1))
 				salida="Es un TRIANGULO";
 			else if((pattern.getArray()[0]<0.1)&&(pattern.getArray()[1]>0.8)&&(pattern.getArray()[2]<0.1))
@@ -242,7 +262,8 @@ public class GeometricFigureRecognizer implements NeuralNetListener {
 			else
 				salida="La figura no fue reconocida";
 			
-			if(this.LOGGER) System.out.println("Output: "+salida);
+			if(LOGGER) System.out.println(salida);
+			jep.append(salida+"\n");
 		}
 		//Tell the network to stop
 		Pattern stop = new Pattern(new double[3]);
