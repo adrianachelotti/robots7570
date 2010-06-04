@@ -1,7 +1,6 @@
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
 
 import javax.imageio.ImageIO;
 
@@ -14,6 +13,8 @@ public class ProcesadorDeImagenes {
 	private BufferedImage imagenR;
 	private int IMAGEN_HEIGHT = 240;
 	private int IMAGEN_WIDTH = 320;
+	private String nombreArchivoAProcesar;
+	
 	public ProcesadorDeImagenes() {
 		// TODO Auto-generated constructor stub
 		this.imageO= new BufferedImage(IMAGEN_WIDTH,IMAGEN_HEIGHT,BufferedImage.TYPE_INT_RGB);
@@ -25,10 +26,13 @@ public class ProcesadorDeImagenes {
 	public void cargarImagen(String nameFile)
 	{
 		File archivoImagenAProcesar = new File(nameFile);
-		try {
+		this.nombreArchivoAProcesar = archivoImagenAProcesar.getName();
+		try 
+		{
 			this.imageO= ImageIO.read(archivoImagenAProcesar);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) 
+		{
 			e.printStackTrace();
 		}
 		
@@ -64,7 +68,7 @@ public class ProcesadorDeImagenes {
 	  * Graba esta imagen transformada en la carpeta de Recortes 
 	  * @param name: nombre del archivo de la imagen
 	  */
-	public void recortarImagen(String name)
+	public void recortarImagen()
 	{
 		int imagenWidth = this.imageO.getWidth();
 		int imagenHeight = this.imageO.getHeight();
@@ -157,7 +161,7 @@ public class ProcesadorDeImagenes {
 //		if ((xEnd<xBegin)||(yBegin<yEnd))
 		this.imagenR= this.imageO.getSubimage(xBegin, yBegin, xEnd-xBegin, yEnd-yBegin);
 		try {
-			ImageIO.write(this.imagenR, "jpg", new File("Figuras/Recortes/"+name.replace(".jpg", "_recotada")+".jpg"));
+			ImageIO.write(this.imagenR, "jpg", new File("Figuras/Recortes/"+this.nombreArchivoAProcesar.replace(".jpg", "_recotada")+".jpg"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -235,7 +239,7 @@ public class ProcesadorDeImagenes {
 				System.out.println(ficheros[s]);
 				converso.cargarImagen("Figuras/"+ficheros[s]);
 				converso.procesarImagen();
-				converso.recortarImagen(ficheros[s]);
+				converso.recortarImagen();
 				double porcentajes[]= converso.getPorcentajes();
 				for (int i = 0; i < porcentajes.length; i++) 
 				{
